@@ -31,7 +31,7 @@ mxClassID MATLAB_LABEL_TYPE = mxINT32_CLASS;
 typedef Graph<EnergyTermType,EnergyTermType,EnergyType> GraphType; 
 
 
-int round(double a);
+int roundToInt(double a);
 int isInteger(double a);
 
 #define MATLAB_ASSERT(expr,msg) if (!(expr)) { mexErrMsgTxt(msg);}
@@ -78,9 +78,9 @@ void mexFunction(int nlhs, mxArray *plhs[],
 	EnergyTermType* edges = (EnergyTermType*)mxGetData(pInPtr);
 	for(int i = 0; i < numEdges; i++)
 	{
-		MATLAB_ASSERT(1 <= round(edges[i]) && round(edges[i]) <= numNodes, "computeMinMarginals: error in pairwise terms array: wrong vertex index");
+		MATLAB_ASSERT(1 <= roundToInt(edges[i]) && roundToInt(edges[i]) <= numNodes, "computeMinMarginals: error in pairwise terms array: wrong vertex index");
 		MATLAB_ASSERT(isInteger(edges[i]), "computeMinMarginals: error in pairwise terms array: wrong vertex index");
-		MATLAB_ASSERT(1 <= round(edges[i + numEdges]) && round(edges[i + numEdges]) <= numNodes, "computeMinMarginals: error in pairwise terms array: wrong vertex index");
+		MATLAB_ASSERT(1 <= roundToInt(edges[i + numEdges]) && roundToInt(edges[i + numEdges]) <= numNodes, "computeMinMarginals: error in pairwise terms array: wrong vertex index");
 		MATLAB_ASSERT(isInteger(edges[i + numEdges]), "computeMinMarginals: error in pairwise terms array: wrong vertex index");
 		MATLAB_ASSERT(edges[i + 2 * numEdges] + edges[i + 3 * numEdges] >= 0, "computeMinMarginals: error in pairwise terms array: nonsubmodular edge");
 	}
@@ -111,20 +111,20 @@ void mexFunction(int nlhs, mxArray *plhs[],
 			else
 			{
 				if (edges[2 * numEdges + i] >= 0 && edges[3 * numEdges + i] >= 0)
-					g -> add_edge((GraphType::node_id)round(edges[i] - 1), (GraphType::node_id)round(edges[numEdges + i] - 1), edges[2 * numEdges + i], edges[3 * numEdges + i]);
+					g -> add_edge((GraphType::node_id)roundToInt(edges[i] - 1), (GraphType::node_id)roundToInt(edges[numEdges + i] - 1), edges[2 * numEdges + i], edges[3 * numEdges + i]);
 				else
 					if (edges[2 * numEdges + i] <= 0 && edges[3 * numEdges + i] >= 0)
 					{
-						g -> add_edge((GraphType::node_id)round(edges[i] - 1), (GraphType::node_id)round(edges[numEdges + i] - 1), 0, edges[3 * numEdges + i] + edges[2 * numEdges + i]);
-						g -> add_tweights((GraphType::node_id)round(edges[i] - 1), 0, edges[2 * numEdges + i]); 
-						g -> add_tweights((GraphType::node_id)round(edges[numEdges + i] - 1),0 , -edges[2 * numEdges + i]); 
+						g -> add_edge((GraphType::node_id)roundToInt(edges[i] - 1), (GraphType::node_id)roundToInt(edges[numEdges + i] - 1), 0, edges[3 * numEdges + i] + edges[2 * numEdges + i]);
+						g -> add_tweights((GraphType::node_id)roundToInt(edges[i] - 1), 0, edges[2 * numEdges + i]); 
+						g -> add_tweights((GraphType::node_id)roundToInt(edges[numEdges + i] - 1),0 , -edges[2 * numEdges + i]); 
 					}
 					else
 						if (edges[2 * numEdges + i] >= 0 && edges[3 * numEdges + i] <= 0)
 						{
-							g -> add_edge((GraphType::node_id)round(edges[i] - 1), (GraphType::node_id)round(edges[numEdges + i] - 1), edges[3 * numEdges + i] + edges[2 * numEdges + i], 0);
-							g -> add_tweights((GraphType::node_id)round(edges[i] - 1),0 , -edges[3 * numEdges + i]); 
-							g -> add_tweights((GraphType::node_id)round(edges[numEdges + i] - 1), 0, edges[3 * numEdges + i]); 
+							g -> add_edge((GraphType::node_id)roundToInt(edges[i] - 1), (GraphType::node_id)roundToInt(edges[numEdges + i] - 1), edges[3 * numEdges + i] + edges[2 * numEdges + i], 0);
+							g -> add_tweights((GraphType::node_id)roundToInt(edges[i] - 1),0 , -edges[3 * numEdges + i]); 
+							g -> add_tweights((GraphType::node_id)roundToInt(edges[numEdges + i] - 1), 0, edges[3 * numEdges + i]); 
 						}
 						else
 							mexWarnMsgIdAndTxt("computeMinMarginals:pairwisePotentials", "Something strange with an edge and therefore it is ignored");
@@ -179,12 +179,12 @@ void mexFunction(int nlhs, mxArray *plhs[],
 	delete g;
 }
 
-int round(double a)
+int roundToInt(double a)
 {
 	return floor(a + 0.5);
 }
 
 int isInteger(double a)
 {
-	return (a - round(a) < 1e-6);
+	return (a - roundToInt(a) < 1e-6);
 }
